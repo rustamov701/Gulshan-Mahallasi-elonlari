@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GulshanBozor — Gulshan mahallasi e’lonlari</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="media.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-10">
+  <!-- Yuqori panel -->
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">GulshanBozor</h1>
+        <p class="text-xs sm:text-sm text-slate-400">Gulshan mahallasi e’lonlari</p>
+      </div>
+
+      <!-- Faqat bitta yuqori Kirish / Ro'yxatdan o'tish guruhi -->
+      <div id="authHeaderActions" class="flex items-center gap-2">
+        <button id="loginBtn" type="button" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium cursor-pointer">
+          Kirish
+        </button>
+        <button id="registerBtn" type="button" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-semibold cursor-pointer">
+          Ro‘yxatdan o‘tish
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 pt-5 space-y-5">
+    <!-- Premium blok (2-qator ortiqcha Kirish o'rniga Premium olish) -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-up">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
+            PREMIUM
+          </span>
+          <span id="statusBadge" class="text-xs text-slate-400">Bepul tarif</span>
+        </div>
+        <p class="text-sm sm:text-base text-slate-200 font-medium">
+          Kunlik bepul e’lon limiti to‘lganda Premium oynasi avtomatik ochiladi. Ko‘proq imkoniyat uchun Premium oling.
+        </p>
+      </div>
+
+      <button id="openPremiumBtn" type="button" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-sm font-bold shrink-0 cursor-pointer">
+        Premium olish
+      </button>
+    </section>
+
+    <!-- Qidiruv va E'lon qo'shish -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Mahsulot yoki do‘kon qidirish..."
+          class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 text-sm sm:text-base"
+        />
+        <button id="openPostModalBtn" type="button" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm shrink-0 cursor-pointer">
+          + E’lon qo‘shish
+        </button>
+      </div>
+
+      <!-- Filtr tugmalari -->
+      <div id="categoryFilters" class="flex flex-wrap gap-2 pt-1">
+        <button type="button" data-category="Hammasi" class="cat-btn active px-3.5 py-1.5 rounded-full text-sm font-medium cursor-pointer">
+          Hammasi
+        </button>
+        <button type="button" data-category="Baliqxona" class="cat-btn px-3.5 py-1.5 rounded-full text-sm font-medium cursor-pointer">
+          Baliqxona
+        </button>
+        <button type="button" data-category="Oziq-ovqat" class="cat-btn px-3.5 py-1.5 rounded-full text-sm font-medium cursor-pointer">
+          Oziq-ovqat
+        </button>
+        <button type="button" data-category="Aksiya" class="cat-btn px-3.5 py-1.5 rounded-full text-sm font-medium cursor-pointer">
+          Aksiya
+        </button>
+      </div>
+    </section>
+
+    <!-- E'lonlar ro'yxati -->
+    <section>
+      <div id="listingsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="emptyState" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 mt-4">
+        E’lon topilmadi.
+      </div>
+    </section>
+  </main>
+
+  <!-- E'lon qo'shish modali -->
+  <div id="postModal" class="fixed inset-0 z-50 hidden bg-black/75 items-center justify-center p-4">
+    <div class="modal-card bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-white">Yangi e’lon qo‘shish</h2>
+        <button id="closePostModalBtn" type="button" class="text-slate-400 hover:text-white text-xl leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <form id="postForm" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Mahsulot yoki xizmat nomi</label>
+          <input id="postTitle" type="text" required placeholder="Masalan: Yangi sazan baliq" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Kategoriya</label>
+            <select id="postCategory" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm">
+              <option value="Baliqxona">Baliqxona</option>
+              <option value="Oziq-ovqat">Oziq-ovqat</option>
+              <option value="Aksiya">Aksiya</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Narx</label>
+            <input id="postPrice" type="text" required placeholder="Masalan: 38 000 so‘m / kg" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Telefon raqam</label>
+          <input id="postPhone" type="tel" required placeholder="+998 90 123 45 67" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm" />
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">
+            Rasmlar (bepul tarifda <span id="imageLimitLabel" class="text-emerald-400 font-semibold">5 tagacha</span>)
+          </label>
+          <input id="postImages" type="file" accept="image/*" multiple class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-slate-800 file:text-white hover:file:bg-slate-700 cursor-pointer" />
+          <p id="imageHint" class="text-xs text-slate-400 mt-1">Bepul tarifda maksimal 5 ta rasm yuklash mumkin.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Qo‘shimcha ma’lumot</label>
+          <textarea id="postDesc" rows="2" placeholder="Manzil, vaqt yoki batafsil izoh..." class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancelPostBtn" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm cursor-pointer">Bekor qilish</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm cursor-pointer">Joylashtirish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Premium modali (kunlik limit to'lganda avtomatik chiqadi) -->
+  <div id="premiumModal" class="fixed inset-0 z-50 hidden bg-black/75 items-center justify-center p-4">
+    <div class="modal-card bg-slate-900 border border-amber-400/40 rounded-2xl w-full max-w-md p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-amber-300">Premium tarif</h2>
+        <button id="closePremiumModalBtn" type="button" class="text-slate-400 hover:text-white text-xl leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <p id="premiumReasonText" class="text-sm text-slate-200 leading-relaxed">
+        Kunlik bepul e’lon limitiga yetdingiz. Davom etish uchun Premium tarifni faollashtiring.
+      </p>
+
+      <ul class="text-xs sm:text-sm text-slate-300 space-y-1.5 bg-slate-800/80 p-3.5 rounded-xl border border-slate-700">
+        <li>• Kunlik e’lon limitini kengaytirish</li>
+        <li>• E’lonlarni qulay boshqarish</li>
+        <li>• Qo‘shimcha imkoniyatlar</li>
+      </ul>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="closePremiumSecondaryBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm cursor-pointer">Yopish</button>
+        <button id="activatePremiumBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm cursor-pointer">
+          Premium faollashtirish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kirish / Ro'yxatdan o'tish modali -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden bg-black/75 items-center justify-center p-4">
+    <div class="modal-card bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 id="authModalTitle" class="text-lg font-bold text-white">Kirish</h2>
+        <button id="closeAuthModalBtn" type="button" class="text-slate-400 hover:text-white text-xl leading-none cursor-pointer">&times;</button>
+      </div>
+      <form id="authForm" class="space-y-3">
+        <input id="authName" type="text" required placeholder="Ismingiz yoki do‘kon nomi" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm" />
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm cursor-pointer">
+          Tasdiqlash
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>

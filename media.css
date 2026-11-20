@@ -1,0 +1,99 @@
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-up,
+#listingsGrid article,
+#postsGrid article {
+  animation: fadeUp 0.25s ease-out both;
+}
+
+.modal-card,
+#authModal:not(.hidden) > div,
+#premiumModal:not(.hidden) > div,
+#postModal:not(.hidden) > div {
+  animation: modalPop 0.22s ease-out both;
+}
+
+#listingsGrid article img,
+#postsGrid article img {
+  transition: transform 0.35s ease;
+}
+
+#listingsGrid article:hover img,
+#postsGrid article:hover img {
+  transform: scale(1.03);
+}
+
+button,
+a[href^="tel:"] {
+  transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button:active,
+a[href^="tel:"]:active {
+  transform: scale(0.97);
+}
+
+.cat-btn {
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+}
+
+.cat-btn:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.cat-btn.active {
+  background-color: #10b981;
+  color: #020617;
+  border-color: #10b981;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #listingsGrid article,
+  #listingsGrid article img,
+  #postsGrid article,
+  #postsGrid article img,
+  #authModal > div,
+  #premiumModal > div,
+  #postModal > div,
+  .fade-up,
+  .modal-card,
+  button,
+  a[href^="tel:"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
