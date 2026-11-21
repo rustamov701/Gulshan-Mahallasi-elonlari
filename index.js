@@ -1,5 +1,5 @@
 (() => {
-  const FREE_IMAGE_LIMIT = 5; // Bepul  maksimal 5 ta rasm
+  const FREE_IMAGE_LIMIT = 5; // Bepul maksimal 5 ta rasm
   const DAILY_FREE_POST_LIMIT = 2; // Kunlik bepul e'lon limiti
   const PREMIUM_DAILY_POST_LIMIT = 20;
 
@@ -13,6 +13,7 @@
   const DEFAULT_LISTINGS = [
     {
       id: 1,
+      owner: null,
       title: "Yangi sazan baliq",
       category: "Baliqxona",
       price: "38 000 so‘m / kg",
@@ -22,6 +23,7 @@
     },
     {
       id: 2,
+      owner: null,
       title: "Mahalliy non va sut mahsulotlari",
       category: "Oziq-ovqat",
       price: "12 000 so‘m",
@@ -31,6 +33,7 @@
     },
     {
       id: 3,
+      owner: null,
       title: "Haftalik oziq-ovqat aksiyasi",
       category: "Aksiya",
       price: "Chegirma 15%",
@@ -44,6 +47,16 @@
   let searchQuery = "";
 
   const $ = (id) => document.getElementById(id);
+
+  function getCurrentUser() {
+    const u = localStorage.getItem(STORAGE_KEYS.user);
+    return u ? u.trim() : "";
+  }
+
+  function canDeleteItem(item) {
+    const currentUser = getCurrentUser();
+    return Boolean(currentUser && item && item.owner && item.owner === currentUser);
+  }
 
   function getTodayKey() {
     const now = new Date();
@@ -152,7 +165,7 @@
       }
     }
 
-    const user = localStorage.getItem(STORAGE_KEYS.user);
+    const user = getCurrentUser();
     const authHeader = $("authHeaderActions");
     if (user && authHeader) {
       authHeader.innerHTML = `<span class="px-3 py-1.5 rounded-lg bg-slate-800 text-emerald-300 text-xs sm:text-sm font-medium">${escapeHtml(user)}</span>`;
@@ -185,8 +198,14 @@
 
     emptyState?.classList.add("hidden");
     grid.innerHTML = filtered
-      .map(
-        (item) => `
+      .map((item) => {
+        const deleteButtonHtml = canDeleteItem(item)
+          ? `<button type="button" data-delete-id="${item.id}" class="delete-post-btn px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-medium cursor-pointer">
+              O‘chirish
+            </button>`
+          : "";
+
+        return `
         <article class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between gap-3 fade-up">
           <div class="space-y-2">
             ${
@@ -210,14 +229,12 @@
               <a href="tel:${escapeHtml(item.phone.replace(/\s+/g, ""))}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-medium">
                 Qo‘ng‘iroq
               </a>
-              <button type="button" data-delete-id="${item.id}" class="delete-post-btn px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-medium cursor-pointer">
-                O‘chirish
-              </button>
+              ${deleteButtonHtml}
             </div>
           </div>
         </article>
-      `
-      )
+      `;
+      })
       .join("");
   }
 
@@ -250,7 +267,7 @@
       });
     }
 
-    // E'lon kartochkasidagi "O'chirish" tugmasi
+    // E'lon kartochkasidagi "O'chirish" tugmasi (faqat e'lon egasi o'chira oladi)
     const gridEl = $("listingsGrid");
     if (gridEl) {
       gridEl.addEventListener("click", (e) => {
@@ -258,7 +275,16 @@
         if (!delBtn) return;
 
         const targetId = Number(delBtn.dataset.deleteId);
-        const updated = loadListings().filter((item) => item.id !== targetId);
+        const currentList = loadListings();
+        const targetItem = currentList.find((item) => item.id === targetId);
+
+        if (!canDeleteItem(targetItem)) {
+          alert("Faqat o‘zingiz qo‘shgan e’lonni o‘chira olasiz!");
+          renderListings();
+          return;
+        }
+
+        const updated = currentList.filter((item) => item.id !== targetId);
         saveListings(updated);
         renderListings();
       });
@@ -309,9 +335,15 @@
 
       const files = Array.from($("postImages")?.files || []).slice(0, FREE_IMAGE_LIMIT);
       const images = files.length > 0 ? await readFilesAsDataUrls(files) : [];
+      const currentUser = getCurrentUser() || "Mehmon";
+
+      if (!getCurrentUser()) {
+        localStorage.setItem(STORAGE_KEYS.user, currentUser);
+      }
 
       const newItem = {
         id: Date.now(),
+        owner: currentUser,
         title: $("postTitle").value.trim(),
         category: $("postCategory").value,
         price: $("postPrice").value.trim(),
@@ -372,6 +404,7 @@
       }
       closeModal($("authModal"));
       updateStatusUI();
+      renderListings();
     });
   }
 
