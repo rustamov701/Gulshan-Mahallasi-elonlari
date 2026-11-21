@@ -1,5 +1,5 @@
 (() => {
-  const FREE_IMAGE_LIMIT = 5; // Bepul tarifda maksimal 5 ta rasm
+  const FREE_IMAGE_LIMIT = 5; // Bepul  maksimal 5 ta rasm
   const DAILY_FREE_POST_LIMIT = 2; // Kunlik bepul e'lon limiti
   const PREMIUM_DAILY_POST_LIMIT = 20;
 
