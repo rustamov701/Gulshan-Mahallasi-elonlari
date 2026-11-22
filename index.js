@@ -44,17 +44,18 @@
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return [];
 
-      // Agar avvalgi versiyadan qolgan namuna e'lonlar (id: 1, 2, 3 va owner: null) bo'lsa, bir martalik tozalanadi
+      // Agar avvalgi versiyadan qolgan namuna e'lonlar (id: 1, 2, 3 va owner: null) bo'lsa, tozalanadi
+      const legacyTitles = [
+        "Yangi sazan baliq",
+        "Mahalliy non va sut mahsulotlari",
+        "Haftalik oziq-ovqat aksiyasi"
+      ];
       const hasLegacyDefaults = parsed.some(
         (item) =>
           item &&
           item.owner === null &&
           [1, 2, 3].includes(Number(item.id)) &&
-          [
-            "Yangi sazan baliq",
-            "Mahalliy non va sut mahsulotlari",
-            "Haftalik oziq-ovqat aksiyasi"
-          ].includes(item.title)
+          legacyTitles.includes(item.title)
       );
 
       if (hasLegacyDefaults) {
@@ -64,11 +65,7 @@
               item &&
               item.owner === null &&
               [1, 2, 3].includes(Number(item.id)) &&
-              [
-                "Yangi sazan baliq",
-                "Mahalliy non va sut mahsulotlari",
-                "Haftalik oziq-ovqat aksiyasi"
-              ].includes(item.title)
+              legacyTitles.includes(item.title)
             )
         );
         localStorage.setItem(STORAGE_KEYS.listings, JSON.stringify(cleaned));
@@ -144,6 +141,17 @@
       .replaceAll('"', "&quot;");
   }
 
+  function openAuthDialog(titleText, preffillName = "") {
+    if ($("authModalTitle")) {
+      $("authModalTitle").textContent = titleText;
+    }
+    if ($("authName")) {
+      $("authName").value = preffillName;
+    }
+    openModal($("authModal"));
+    setTimeout(() => $("authName")?.focus(), 50);
+  }
+
   function updateStatusUI() {
     const badge = $("statusBadge");
     const limitLabel = $("imageLimitLabel");
@@ -168,8 +176,35 @@
 
     const user = getCurrentUser();
     const authHeader = $("authHeaderActions");
-    if (user && authHeader) {
-      authHeader.innerHTML = `<span class="px-3 py-1.5 rounded-lg bg-slate-800 text-emerald-300 text-xs sm:text-sm font-medium">${escapeHtml(user)}</span>`;
+    if (!authHeader) return;
+
+    if (user) {
+      const actionLabel = user === "Mehmon" ? "Ro‘yxatdan o‘tish" : "O‘zgartirish";
+      authHeader.innerHTML = `
+        <span class="px-3 py-1.5 rounded-lg bg-slate-800 text-emerald-300 text-xs sm:text-sm font-medium">${escapeHtml(user)}</span>
+        <button id="editAccountBtn" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-semibold cursor-pointer">
+          ${actionLabel}
+        </button>
+      `;
+
+      $("editAccountBtn")?.addEventListener("click", () => {
+        openAuthDialog(
+          user === "Mehmon" ? "Ro‘yxatdan o‘tish" : "Ismni o‘zgartirish",
+          user === "Mehmon" ? "" : user
+        );
+      });
+    } else {
+      authHeader.innerHTML = `
+        <button id="loginBtn" type="button" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium cursor-pointer">
+          Kirish
+        </button>
+        <button id="registerBtn" type="button" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-semibold cursor-pointer">
+          Ro‘yxatdan o‘tish
+        </button>
+      `;
+
+      $("loginBtn")?.addEventListener("click", () => openAuthDialog("Kirish", ""));
+      $("registerBtn")?.addEventListener("click", () => openAuthDialog("Ro‘yxatdan o‘tish", ""));
     }
   }
 
@@ -387,15 +422,9 @@
       alert("Premium tarif faollashtirildi!");
     });
 
-    // Kirish / Ro'yxatdan o'tish
-    $("loginBtn")?.addEventListener("click", () => {
-      $("authModalTitle").textContent = "Kirish";
-      openModal($("authModal"));
-    });
-    $("registerBtn")?.addEventListener("click", () => {
-      $("authModalTitle").textContent = "Ro‘yxatdan o‘tish";
-      openModal($("authModal"));
-    });
+    // Kirish / Ro'yxatdan o'tish / Ismni o'zgartirish
+    $("loginBtn")?.addEventListener("click", () => openAuthDialog("Kirish", ""));
+    $("registerBtn")?.addEventListener("click", () => openAuthDialog("Ro‘yxatdan o‘tish", ""));
     $("closeAuthModalBtn")?.addEventListener("click", () => closeModal($("authModal")));
     $("authForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
