@@ -7,41 +7,9 @@
     listings: "gulshan_listings_v1",
     dailyUsage: "gulshan_daily_usage_v1",
     isPremium: "gulshan_is_premium_v1",
-    user: "gulshan_user_v1"
+    user: "gulshan_user_v1",
+    seededDefaults: "gulshan_seeded_defaults_v1"
   };
-
-  const DEFAULT_LISTINGS = [
-    {
-      id: 1,
-      owner: null,
-      title: "Yangi sazan baliq",
-      category: "Baliqxona",
-      price: "38 000 so‘m / kg",
-      phone: "+998 90 111 22 33",
-      desc: "Bugun ertalab keltirilgan, toza va yangi.",
-      images: []
-    },
-    {
-      id: 2,
-      owner: null,
-      title: "Mahalliy non va sut mahsulotlari",
-      category: "Oziq-ovqat",
-      price: "12 000 so‘m",
-      phone: "+998 91 222 33 44",
-      desc: "Har kuni ertalab issiq holda yetkaziladi.",
-      images: []
-    },
-    {
-      id: 3,
-      owner: null,
-      title: "Haftalik oziq-ovqat aksiyasi",
-      category: "Aksiya",
-      price: "Chegirma 15%",
-      phone: "+998 93 333 44 55",
-      desc: "Tanlangan mahsulotlarga maxsus chegirma.",
-      images: []
-    }
-  ];
 
   let activeCategory = "Hammasi";
   let searchQuery = "";
@@ -70,13 +38,46 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.listings);
       if (!raw) {
-        localStorage.setItem(STORAGE_KEYS.listings, JSON.stringify(DEFAULT_LISTINGS));
-        return [...DEFAULT_LISTINGS];
+        localStorage.setItem(STORAGE_KEYS.listings, JSON.stringify([]));
+        return [];
       }
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [...DEFAULT_LISTINGS];
+      if (!Array.isArray(parsed)) return [];
+
+      // Agar avvalgi versiyadan qolgan namuna e'lonlar (id: 1, 2, 3 va owner: null) bo'lsa, bir martalik tozalanadi
+      const hasLegacyDefaults = parsed.some(
+        (item) =>
+          item &&
+          item.owner === null &&
+          [1, 2, 3].includes(Number(item.id)) &&
+          [
+            "Yangi sazan baliq",
+            "Mahalliy non va sut mahsulotlari",
+            "Haftalik oziq-ovqat aksiyasi"
+          ].includes(item.title)
+      );
+
+      if (hasLegacyDefaults) {
+        const cleaned = parsed.filter(
+          (item) =>
+            !(
+              item &&
+              item.owner === null &&
+              [1, 2, 3].includes(Number(item.id)) &&
+              [
+                "Yangi sazan baliq",
+                "Mahalliy non va sut mahsulotlari",
+                "Haftalik oziq-ovqat aksiyasi"
+              ].includes(item.title)
+            )
+        );
+        localStorage.setItem(STORAGE_KEYS.listings, JSON.stringify(cleaned));
+        return cleaned;
+      }
+
+      return parsed;
     } catch {
-      return [...DEFAULT_LISTINGS];
+      return [];
     }
   }
 
